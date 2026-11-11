@@ -1,0 +1,130 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#06111f">
+<title>JARVIS - Asistente personal</title>
+<style>
+*{box-sizing:border-box}
+body{
+ margin:0;min-height:100vh;background:#06111f;color:#d9f4ff;
+ font-family:Arial,sans-serif;display:flex;justify-content:center;
+ align-items:center;padding:20px;
+}
+.app{width:100%;max-width:430px;text-align:center}
+h1{letter-spacing:9px;color:#59caff;font-size:32px}
+.status{color:#65d9ff;font-size:12px;letter-spacing:3px}
+.core{
+ width:205px;height:205px;border-radius:50%;margin:35px auto;
+ display:flex;align-items:center;justify-content:center;
+ border:2px solid #39bfff;
+ box-shadow:0 0 25px #008bff, inset 0 0 25px #008bff;
+ animation:pulse 3s infinite;
+}
+.core span{font-size:55px;color:#72d9ff}
+@keyframes pulse{
+ 50%{box-shadow:0 0 45px #008bff,inset 0 0 40px #008bff}
+}
+#message{min-height:55px;color:#b9eaff;line-height:1.5}
+button,input{
+ width:100%;padding:15px;margin-top:12px;border-radius:12px;
+ border:1px solid #269bdf;background:#102b43;color:white;
+ font-size:16px;
+}
+button{cursor:pointer}
+button:active{background:#17608c}
+#talk{background:#087dbb;font-weight:bold}
+.small{font-size:12px;color:#7198b3;margin-top:22px}
+</style>
+</head>
+<body>
+<div class="app">
+ <div class="status" id="status">SISTEMA INICIADO</div>
+ <h1>J.A.R.V.I.S.</h1>
+ <div class="core"><span>◉</span></div>
+ <h3>Buenos días. Soy JARVIS.</h3>
+ <p id="message">Estoy preparado para ayudarte.</p>
+
+ <button id="talk" onclick="listen()">🎙 HABLAR CON JARVIS</button>
+ <input id="command" placeholder="Escribe una orden...">
+ <button onclick="send()">Enviar orden</button>
+ <button onclick="speak('A sus órdenes. Estoy preparado.')">
+ 🔊 Probar mi voz
+ </button>
+ <div class="small">JARVIS PERSONAL AI · VERSIÓN 1.0</div>
+</div>
+
+<script>
+const message=document.getElementById("message");
+const status=document.getElementById("status");
+
+function speak(text){
+ message.textContent=text;
+ if("speechSynthesis" in window){
+  speechSynthesis.cancel();
+  const voice=new SpeechSynthesisUtterance(text);
+  voice.lang="es-ES";
+  voice.rate=0.95;
+  speechSynthesis.speak(voice);
+ }
+}
+
+function respond(text){
+ const q=text.toLowerCase();
+ if(q.includes("hola")){
+  speak("Hola. Me alegra escucharte. ¿Qué necesitas?");
+ }else if(q.includes("hora")){
+  speak("La hora actual es "+new Date().toLocaleTimeString("es-ES"));
+ }else if(q.includes("fecha")){
+  speak("Hoy es "+new Date().toLocaleDateString("es-ES"));
+ }else if(q.includes("tu nombre")){
+  speak("Soy JARVIS, tu asistente personal.");
+ }else if(q.includes("cómo estás")||q.includes("como estas")){
+  speak("Todos mis sistemas están preparados.");
+ }else if(q.includes("ayuda")){
+  speak("Puedes preguntarme la hora, la fecha o pedirme que te salude.");
+ }else{
+  speak("He recibido tu mensaje: "+text+". Todavía estoy aprendiendo nuevas funciones.");
+ }
+}
+
+function send(){
+ const input=document.getElementById("command");
+ if(input.value.trim()){
+  respond(input.value.trim());
+  input.value="";
+ }
+}
+
+function listen(){
+ const Recognition=window.SpeechRecognition||window.webkitSpeechRecognition;
+ if(!Recognition){
+  speak("El reconocimiento de voz no está disponible en este navegador. Puedes escribirme.");
+  return;
+ }
+ const recognition=new Recognition();
+ recognition.lang="es-ES";
+ recognition.onstart=()=>{
+  status.textContent="ESCUCHANDO...";
+  message.textContent="Te escucho. Habla ahora.";
+ };
+ recognition.onresult=(event)=>{
+  const text=event.results[0][0].transcript;
+  status.textContent="ORDEN RECIBIDA";
+  respond(text);
+ };
+ recognition.onerror=()=>{
+  status.textContent="VOZ NO DISPONIBLE";
+  message.textContent="No he podido escucharte. Comprueba el permiso del micrófono.";
+ };
+ recognition.onend=()=>{
+  status.textContent="SISTEMA PREPARADO";
+ };
+ recognition.start();
+}
+</script>
+</body>
+  </html>
+  
